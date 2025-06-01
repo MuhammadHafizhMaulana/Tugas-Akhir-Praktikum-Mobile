@@ -16,7 +16,7 @@ class ProductPresenter {
     try {
       view.showLoading();
 
-      final List<dynamic> data = await BaseNetwork.getData(endpoint);
+      final List<dynamic> data = await BaseNetwork.getDataProduct(endpoint);
 
       final productList = data.map((json) => Product.fromJson(json)).toList();
 

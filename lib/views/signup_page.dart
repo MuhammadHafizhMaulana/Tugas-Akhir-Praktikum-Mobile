@@ -1,6 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:royal_clothes/views/login.dart';
+import 'package:royal_clothes/views/login_page.dart';
 
 class SignupPage extends StatelessWidget {
   @override

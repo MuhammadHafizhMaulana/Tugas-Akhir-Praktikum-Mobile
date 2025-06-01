@@ -1,8 +1,46 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:royal_clothes/views/signup.dart';
+import 'package:royal_clothes/views/signup_page.dart';
+import 'package:royal_clothes/views/Home_page.dart'; // nanti setelah login akan diarahkan kesini
+import 'package:royal_clothes/views/product_page.dart'; // hanya sebagai testing
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+    @override
+  void dispose() {
+    // Jangan lupa dispose controller saat widget dihancurkan
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
+
+  void login() {
+    String email = emailController.text.trim();
+    String password = passwordController.text;
+
+    // Contoh validasi sederhana (hardcoded)
+    if (email == "flutter" && password == "flutter123") {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()), // halaman selanjutnya
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Email atau password salah")),
+      );
+    }
+  }
+
+  bool _isPasswordVisible = false; // Melihat Password
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,6 +105,8 @@ class LoginPage extends StatelessWidget {
                               label: "Email",
                               textColor: Colors.white,
                               borderColor: Color(0xFFFFD700),
+                              controller: emailController,
+                              isPassword: false,
                             ),
                           ),
                           FadeInUp(
@@ -76,6 +116,8 @@ class LoginPage extends StatelessWidget {
                               obscureText: true,
                               textColor: Colors.white,
                               borderColor: Color(0xFFFFD700),
+                              controller: passwordController,
+                              isPassword: true,
                             ),
                           ),
                         ],
@@ -94,7 +136,7 @@ class LoginPage extends StatelessWidget {
                           child: MaterialButton(
                             minWidth: double.infinity,
                             height: 60,
-                            onPressed: () {},
+                            onPressed: login,
                             color: Color(0xFFFFD700), // tombol emas
                             elevation: 0,
                             shape: RoundedRectangleBorder(
@@ -175,6 +217,8 @@ class LoginPage extends StatelessWidget {
     bool obscureText = false,
     Color? textColor,
     Color? borderColor,
+    TextEditingController? controller,
+    bool isPassword = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,7 +234,8 @@ class LoginPage extends StatelessWidget {
         ),
         SizedBox(height: 5),
         TextField(
-          obscureText: obscureText,
+          obscureText: isPassword ? !_isPasswordVisible : false,
+          controller: controller,
           style: TextStyle(color: textColor ?? Colors.white),
           decoration: InputDecoration(
             contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 10),
@@ -203,6 +248,19 @@ class LoginPage extends StatelessWidget {
             border: OutlineInputBorder(
               borderSide: BorderSide(color: borderColor ?? Colors.white54),
             ),
+            suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: textColor ?? Colors.white54,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                )
+              : null,       
           ),
         ),
         SizedBox(height: 30),

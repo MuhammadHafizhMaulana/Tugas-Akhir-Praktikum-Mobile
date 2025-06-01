@@ -6,7 +6,8 @@ class BaseNetwork {
   static const String baseUrl =
       "https://fakestoreapi.com/"; //base URL for the API
 
-  static Future<List<dynamic>> getData(String endpoint) async {
+  //Mengambil semua data Produk 
+  static Future<List<dynamic>> getDataProduct(String endpoint) async {
     final response = await http.get(Uri.parse(baseUrl + endpoint));
 
     if (response.statusCode == 200) {
@@ -19,12 +20,13 @@ class BaseNetwork {
     }
   }
 
-  static Future<Map<String, dynamic>> getDetalData(
+
+  //Mengambil data Produk base ID 
+  static Future<Map<String, dynamic>> getDetalDataProduct(
     String endpoint,
     int id,
   ) async {
     final response = await http.get(Uri.parse(baseUrl + '$endpoint/$id'));
-
     if (response.statusCode == 200) {
       return jsonDecode(response.body); // Decode the JSON response
     } else {
