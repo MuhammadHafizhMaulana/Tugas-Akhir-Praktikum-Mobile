@@ -1,9 +1,5 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:royal_clothes/views/login_page.dart';
-import 'package:royal_clothes/views/signup_page.dart';
-
-
 
 class LandingPage extends StatelessWidget {
   @override
@@ -77,10 +73,7 @@ class LandingPage extends StatelessWidget {
                       minWidth: double.infinity,
                       height: 60,
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => LoginPage()),
-                        );
+                        Navigator.pushNamed(context, '/login');
                       },
                       shape: RoundedRectangleBorder(
                         side: BorderSide(
@@ -111,12 +104,7 @@ class LandingPage extends StatelessWidget {
                         minWidth: double.infinity,
                         height: 60,
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SignupPage(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, '/signup');
                         },
                         color: Color(0xFFBFA82D), // emas gelap
                         elevation: 0,

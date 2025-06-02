@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:royal_clothes/views/signup_page.dart';
 import 'package:royal_clothes/views/Home_page.dart';
 
-
 class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -13,7 +12,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-    @override
+  @override
   void dispose() {
     // Jangan lupa dispose controller saat widget dihancurkan
     emailController.dispose();
@@ -21,21 +20,17 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-
   void login() {
     String email = emailController.text.trim();
     String password = passwordController.text;
 
     // Contoh validasi sederhana (hardcoded)
     if (email == "flutter" && password == "flutter123") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()), // halaman selanjutnya
-      );
+      Navigator.pushReplacementNamed(context, '/home'); // halaman selanjutnya
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Email atau password salah")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Email atau password salah")));
     }
   }
 
@@ -170,12 +165,8 @@ class _LoginPageState extends State<LoginPage> {
                           GestureDetector(
                             onTap: () {
                               Color.fromARGB(255, 0, 0, 0);
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => SignupPage(),
-                                ),
-                              );
+
+                              Navigator.pushNamed(context, '/signup');
                             },
                             child: Text(
                               "Sign up",
@@ -189,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ],
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -204,7 +195,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -248,19 +239,22 @@ class _LoginPageState extends State<LoginPage> {
             border: OutlineInputBorder(
               borderSide: BorderSide(color: borderColor ?? Colors.white54),
             ),
-            suffixIcon: isPassword
-              ? IconButton(
-                  icon: Icon(
-                    _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                    color: textColor ?? Colors.white54,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _isPasswordVisible = !_isPasswordVisible;
-                    });
-                  },
-                )
-              : null,       
+            suffixIcon:
+                isPassword
+                    ? IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: textColor ?? Colors.white54,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
+                    )
+                    : null,
           ),
         ),
         SizedBox(height: 30),

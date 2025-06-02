@@ -15,21 +15,6 @@ class _HomePageState extends State<HomePage> implements ProductView {
   bool isLoading = false;
   String? errorMessage;
 
-  //sidebar handler
-
-  void handleMenuTap(String menu) {
-    // Contoh navigasi berdasarkan menu yang dipilih
-    switch (menu) {
-      case "home":
-        // sudah di halaman home, mungkin close drawer saja
-        break;
-      case "kategori":
-        Navigator.pushNamed(context, '/kategori');
-        break;
-      // tambah case lain jika perlu
-    }
-  }
-
   @override
   void initState() {
     super.initState();
@@ -85,7 +70,7 @@ class _HomePageState extends State<HomePage> implements ProductView {
           ),
         ],
       ),
-      drawer: SidebarMenu(onMenuTap: handleMenuTap), //sidebar menu
+      drawer: SidebarMenu(),
       body:
           isLoading
               ? Center(child: CircularProgressIndicator())
