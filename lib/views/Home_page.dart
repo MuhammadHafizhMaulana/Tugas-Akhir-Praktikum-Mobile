@@ -3,6 +3,7 @@ import 'package:royal_clothes/presenters/product_presenter.dart';
 import 'package:royal_clothes/models/product_model.dart';
 import 'package:royal_clothes/views/sidebar_menu_page.dart';
 import 'package:royal_clothes/views/appBar_page.dart';
+import 'package:royal_clothes/views/detail_product_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -106,57 +107,70 @@ class _HomePageState extends State<HomePage> implements ProductView {
               ),
     );
   }
-
   Widget productCard(Product product) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Color(0xFF2C2C2C),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.network(
-                product.imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                errorBuilder:
-                    (context, error, stackTrace) =>
-                        Icon(Icons.broken_image, size: 50, color: Colors.grey),
-              ),
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailScreen(
+              id: product.id,
+              endpoint: 'products', // atau gunakan variabel endpoint jika ada
             ),
           ),
-          Padding(
-            padding: EdgeInsets.all(8),
-            child: Text(
-              product.title,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Garamond',
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Color(0xFF2C2C2C),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+                child: Image.network(
+                  product.imageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  errorBuilder:
+                      (context, error, stackTrace) =>
+                          Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                ),
               ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
             ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              'Rp${product.price.toStringAsFixed(0)}',
-              style: TextStyle(
-                color: Color(0xFFFFD700),
-                fontWeight: FontWeight.bold,
-                fontFamily: 'Garamond',
-                fontSize: 16,
+            Padding(
+              padding: EdgeInsets.all(8),
+              child: Text(
+                product.title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Garamond',
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-          ),
-          SizedBox(height: 8),
-        ],
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Text(
+                'Rp${product.price.toStringAsFixed(0)}',
+                style: TextStyle(
+                  color: Color(0xFFFFD700),
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Garamond',
+                  fontSize: 16,
+                ),
+              ),
+            ),
+            SizedBox(height: 8),
+          ],
+        ),
       ),
     );
   }
-}
+  }
+

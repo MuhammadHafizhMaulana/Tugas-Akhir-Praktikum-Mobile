@@ -5,6 +5,7 @@ import 'package:royal_clothes/views/landing_page.dart';
 import 'package:royal_clothes/views/login_page.dart'; 
 import 'package:royal_clothes/views/signup_page.dart';
 import 'package:royal_clothes/views/favorite_page.dart';
+import 'package:royal_clothes/views/kesan_saran_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -25,8 +26,9 @@ class MyApp extends StatelessWidget {
         '/home': (context) => HomePage(),
         '/login': (context) => LoginPage(), 
         '/signup': (context) => SignupPage(),
-        '/category': (context) => CategoryPage(),
+        '/category': (context) => CategoryPage(initialCategory: "women's clothing"),
         '/favorite': (context) => FavoritePage(),
+        '/kesan_saran': (context) => KesanSaranPage(),
         
         // Tambah route lain sesuai kebutuhan
       },

@@ -33,9 +33,9 @@ class SidebarMenu extends StatelessWidget {
                   title: Text('Home'),
                   onTap: () {
                     Navigator.pop(context);
-                    if (onMenuTap != null) onMenuTap!("home");
+                    if (onMenuTap != null ) onMenuTap!("home");
+                    Navigator.pushReplacementNamed(context, '/home');
                     //close drawer
-                    Navigator.pop(context);
                   },
                 ),
                 ListTile(
@@ -53,7 +53,7 @@ class SidebarMenu extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     if (onMenuTap != null) onMenuTap!("favorite");
-                    Navigator.pushNamed(context, '/faforite');
+                    Navigator.pushNamed(context, '/favorite');
                   },
                 ),
                 ListTile(

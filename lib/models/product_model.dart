@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class Product {
   final int id;
   final String title;
@@ -35,4 +37,6 @@ class Product {
           : 0,
     );
   }
+
 }
+
