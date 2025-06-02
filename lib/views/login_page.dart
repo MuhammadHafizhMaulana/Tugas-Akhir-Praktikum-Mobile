@@ -1,8 +1,8 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:royal_clothes/views/signup_page.dart';
-import 'package:royal_clothes/views/Home_page.dart'; // nanti setelah login akan diarahkan kesini
-import 'package:royal_clothes/views/product_page.dart'; // hanya sebagai testing
+import 'package:royal_clothes/views/Home_page.dart';
+
 
 class LoginPage extends StatefulWidget {
   @override

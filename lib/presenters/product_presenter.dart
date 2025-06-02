@@ -28,3 +28,27 @@ class ProductPresenter {
     }
   }
 }
+
+class ProductDetailPresenter {
+  final ProductView view;
+  ProductDetailPresenter(this.view);
+
+  Future<void> loadProductDetail(String endpoint, int id) async {
+    try {
+      view.showLoading();
+
+      final Map<String, dynamic> data = await BaseNetwork.getDetalDataProduct(
+        endpoint,
+        id,
+      );
+
+      final product = Product.fromJson(data);
+
+      view.showProductList([product]); // Wrap in a list for consistency
+    } catch (e) {
+      view.showError(e.toString());
+    } finally {
+      view.hideLoading();
+    }
+  }
+}
