@@ -15,6 +15,7 @@ class _SignupPageState extends State<SignupPage> {
   final TextEditingController confirmPasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool isLoading = false;
+  bool _isPasswordVisible = false; // Melihat Password
 
   Future<void> _registerUser() async {
     if (!_formKey.currentState!.validate()) return;
@@ -51,6 +52,7 @@ class _SignupPageState extends State<SignupPage> {
     bool obscureText = false,
     Color? textColor,
     Color? borderColor,
+    bool isPassword = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +69,7 @@ class _SignupPageState extends State<SignupPage> {
         SizedBox(height: 5),
         TextField(
           controller: controller,
-          obscureText: obscureText,
+          obscureText: isPassword ? !_isPasswordVisible : false,
           style: TextStyle(color: textColor ?? Colors.white),
           decoration: InputDecoration(
             filled: true,
@@ -85,7 +87,23 @@ class _SignupPageState extends State<SignupPage> {
               borderSide: BorderSide(color: borderColor ?? Colors.white54),
               borderRadius: BorderRadius.circular(8),
             ),
-          ),
+            suffixIcon:
+                isPassword
+                    ? IconButton(
+                      icon: Icon(
+                        _isPasswordVisible
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: textColor ?? Colors.white54,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isPasswordVisible = !_isPasswordVisible;
+                        });
+                      },
+                    )
+                    : null,
+              ),
         ),
         SizedBox(height: 30),
       ],
@@ -179,6 +197,7 @@ class _SignupPageState extends State<SignupPage> {
                         obscureText: true,
                         textColor: Colors.white,
                         borderColor: Color(0xFFFFD700),
+                        isPassword: true,
                       ),
                     ),
                     FadeInUp(
@@ -189,6 +208,7 @@ class _SignupPageState extends State<SignupPage> {
                         obscureText: true,
                         textColor: Colors.white,
                         borderColor: Color(0xFFFFD700),
+                        isPassword: true,
                       ),
                     ),
                     SizedBox(height: 40),
