@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SidebarMenu extends StatelessWidget {
   final Function(String)?
@@ -72,10 +73,15 @@ class SidebarMenu extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.logout, color: Colors.redAccent),
             title: Text('Logout', style: TextStyle(color: Colors.redAccent)),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context); // tutup drawer dulu
-              if (onMenuTap != null) onMenuTap!("logout");
-              Navigator.pushReplacementNamed(context, '/logout');
+
+              //hapus status login
+              SharedPreferences prefs = await SharedPreferences.getInstance();
+              await prefs.clear(); // atau prefs.remove('isLoggedIn');
+
+              //navigasi ke login
+              Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
             },
           ),
         ],

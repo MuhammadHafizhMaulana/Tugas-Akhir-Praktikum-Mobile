@@ -1,7 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:royal_clothes/db/database_helper.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -12,12 +12,12 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  @override
-  void dispose() {
-    // Jangan lupa dispose controller saat widget dihancurkan
-    emailController.dispose();
-    passwordController.dispose();
-    super.dispose();
+  
+
+  void saveLoginStatus() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('isLoggedIn', true);
+  await prefs.setString('userEmail', emailController.text.trim());
   }
 
   Future<void> login() async {
@@ -35,6 +35,7 @@ class _LoginPageState extends State<LoginPage> {
     final user = await db.getUser(email, password);
 
     if (user != null) {
+      saveLoginStatus();
       Navigator.pushReplacementNamed(context, '/home');
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -44,6 +45,14 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   bool _isPasswordVisible = false; // Melihat Password
+
+  @override
+  void dispose() {
+    // Jangan lupa dispose controller saat widget dihancurkan
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
