@@ -1,5 +1,6 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:royal_clothes/db/database_helper.dart';
 import 'package:royal_clothes/views/signup_page.dart';
 import 'package:royal_clothes/views/Home_page.dart';
 
@@ -20,17 +21,26 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void login() {
+  Future<void> login() async {
     String email = emailController.text.trim();
     String password = passwordController.text;
 
-    // Contoh validasi sederhana (hardcoded)
-    if (email == "flutter" && password == "flutter123") {
-      Navigator.pushReplacementNamed(context, '/home'); // halaman selanjutnya
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Email dan password tidak boleh kosong")),
+      );
+      return;
+    }
+
+    final db = DBHelper();
+    final user = await db.getUser(email, password);
+
+    if (user != null) {
+      Navigator.pushReplacementNamed(context, '/home');
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Email atau password salah")));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Email atau password salah")),
+      );
     }
   }
 
