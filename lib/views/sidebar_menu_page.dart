@@ -44,7 +44,7 @@ class SidebarMenu extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                     if (onMenuTap != null) onMenuTap!("kategori");
-                    Navigator.pushNamed(context, '/kategori');
+                    Navigator.pushNamed(context, '/category');
                   },
                 ),
                 ListTile(
