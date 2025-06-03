@@ -12,12 +12,11 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-  
-
-  void saveLoginStatus() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setBool('isLoggedIn', true);
-  await prefs.setString('userEmail', emailController.text.trim());
+  void saveLoginData(Map<String, dynamic> userData) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true);
+    await prefs.setInt('userId', userData['id']);
+    await prefs.setString('userEmail', userData['email']);
   }
 
   Future<void> login() async {
@@ -32,15 +31,18 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     final db = DBHelper();
-    final user = await db.getUser(email, password);
+    final user = await db.getUser(
+      email,
+      password,
+    ); // Ganti 'null' dengan argumen yang sesuai jika diperlukan
 
     if (user != null) {
-      saveLoginStatus();
+      saveLoginData(user);
       Navigator.pushReplacementNamed(context, '/home');
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Email atau password salah")),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Email atau password salah")));
     }
   }
 

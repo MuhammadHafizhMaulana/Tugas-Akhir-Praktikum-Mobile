@@ -3,6 +3,7 @@ class User {
   final String name;
   final String email;
   final String password;
+  final String? favorite;
   final String createdAt;
 
   User({
@@ -10,6 +11,7 @@ class User {
     required this.name,
     required this.email,
     required this.password,
+    this.favorite = '',
     required this.createdAt,
   });
 
@@ -19,6 +21,7 @@ class User {
       'name': name,
       'email': email,
       'password': password,
+      'favorite': favorite,
       'created_at': createdAt,
     };
   }
@@ -29,6 +32,7 @@ class User {
       name: map['name'],
       email: map['email'],
       password: map['password'],
+      favorite: map['favorite'],
       createdAt: map['created_at'],
     );
   }

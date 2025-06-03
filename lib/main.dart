@@ -45,7 +45,8 @@ class MyApp extends StatelessWidget {
           builder: (_) => CategoryPage(initialCategory: "women's clothing"),
         );
       case '/favorite':
-        return MaterialPageRoute(builder: (_) => FavoritePage());
+        // Replace with actual userId and endpoint values as needed
+        return MaterialPageRoute(builder: (_) => FavoritePage(endpoint: 'products'));
       case '/kesan_saran':
         return MaterialPageRoute(builder: (_) => KesanSaranPage());
       case '/profile':

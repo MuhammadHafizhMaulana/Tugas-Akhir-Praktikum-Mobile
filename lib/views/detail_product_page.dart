@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:royal_clothes/network/base_network.dart';
 import 'package:royal_clothes/views/appBar_page.dart';
 import 'package:royal_clothes/views/sidebar_menu_page.dart';
+import 'package:royal_clothes/db/database_helper.dart'; // Import DBHelper
 
 class DetailScreen extends StatefulWidget {
   final int id;
@@ -17,11 +18,18 @@ class _DetailScreenState extends State<DetailScreen> {
   bool _isLoading = true;
   Map<String, dynamic>? _detailData;
   String? _errorMessage;
+  bool _isFavorited = false;
+
+  final DBHelper _dbHelper = DBHelper();
+
+  // Ganti dengan userId asli dari sistem loginmu
+  final int currentUserId = 1; 
 
   @override
   void initState() {
     super.initState();
     _fetchDetailData();
+    _loadFavoriteStatus();
   }
 
   Future<void> _fetchDetailData() async {
@@ -37,6 +45,25 @@ class _DetailScreenState extends State<DetailScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _loadFavoriteStatus() async {
+    bool status = await _dbHelper.isFavorited(currentUserId, widget.id);
+    setState(() {
+      _isFavorited = status;
+    });
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (_isFavorited) {
+      await _dbHelper.removeFavorite(currentUserId, widget.id);
+    } else {
+      await _dbHelper.addFavorite(currentUserId, widget.id);
+    }
+    bool status = await _dbHelper.isFavorited(currentUserId, widget.id);
+    setState(() {
+      _isFavorited = status;
+    });
   }
 
   @override
@@ -66,7 +93,6 @@ class _DetailScreenState extends State<DetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Gambar produk
                           if (_detailData!['image'] != null)
                             Center(
                               child: Image.network(
@@ -78,8 +104,6 @@ class _DetailScreenState extends State<DetailScreen> {
                               ),
                             ),
                           SizedBox(height: 24),
-
-                          // Judul produk
                           Text(
                             _detailData!['title'] ?? 'No Title',
                             style: TextStyle(
@@ -90,8 +114,6 @@ class _DetailScreenState extends State<DetailScreen> {
                             ),
                           ),
                           SizedBox(height: 12),
-
-                          // Harga produk
                           Text(
                             _detailData!['price'] != null
                                 ? 'Rp ${(_detailData!['price'] as num).toStringAsFixed(0)}.000'
@@ -103,9 +125,24 @@ class _DetailScreenState extends State<DetailScreen> {
                               fontFamily: 'Garamond',
                             ),
                           ),
-                          SizedBox(height: 20),
 
-                          // Deskripsi produk
+                          Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  _isFavorited ? Icons.favorite : Icons.favorite_border,
+                                  color: _isFavorited ? Colors.red : Colors.white70,
+                                ),
+                                onPressed: _toggleFavorite,
+                              ),
+                              Text(
+                                _isFavorited ? 'Favorited' : 'Add to Favorite',
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            ],
+                          ),
+
+                          SizedBox(height: 20),
                           Text(
                             _detailData!['description'] ?? 'No description available.',
                             style: TextStyle(
@@ -114,7 +151,6 @@ class _DetailScreenState extends State<DetailScreen> {
                               fontFamily: 'Garamond',
                             ),
                           ),
-
                           SizedBox(height: 40),
                         ],
                       ),
