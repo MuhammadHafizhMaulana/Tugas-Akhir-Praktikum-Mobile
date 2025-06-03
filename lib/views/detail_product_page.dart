@@ -94,7 +94,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           // Harga produk
                           Text(
                             _detailData!['price'] != null
-                                ? 'Rp${(_detailData!['price'] as num).toStringAsFixed(0)}'
+                                ? 'Rp ${(_detailData!['price'] as num).toStringAsFixed(0)}.000'
                                 : 'No Price',
                             style: TextStyle(
                               color: Color(0xFFFFD700),

@@ -157,7 +157,7 @@ class _HomePageState extends State<HomePage> implements ProductView {
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 8),
               child: Text(
-                'Rp${product.price.toStringAsFixed(0)}',
+                'Rp ${product.price.toStringAsFixed(0)}.000',
                 style: TextStyle(
                   color: Color(0xFFFFD700),
                   fontWeight: FontWeight.bold,

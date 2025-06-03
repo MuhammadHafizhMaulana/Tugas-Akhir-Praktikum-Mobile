@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SidebarMenu extends StatelessWidget {
-  final Function(String)?
-  onMenuTap; // opsional callback jika mau handle navigasi dari sini
+  final Function(String) ?
+    onMenuTap; // opsional callback jika mau handle navigasi dari sini
 
-  SidebarMenu({this.onMenuTap});
+  SidebarMenu({
+    this.onMenuTap
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +17,7 @@ class SidebarMenu extends StatelessWidget {
           Expanded(
             child: ListView(
               padding: EdgeInsets.zero,
-              children: <Widget>[
+              children: < Widget > [
                 DrawerHeader(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -34,9 +36,26 @@ class SidebarMenu extends StatelessWidget {
                   title: Text('Home'),
                   onTap: () {
                     Navigator.pop(context);
-                    if (onMenuTap != null ) onMenuTap!("home");
+                    if (onMenuTap != null) onMenuTap!("home");
                     Navigator.pushReplacementNamed(context, '/home');
                     //close drawer
+                  },
+                ),
+                ListTile(
+                  leading: Icon(Icons.person),
+                  title: Text('Profil'),
+                  onTap: () async {
+                    Navigator.pop(context);
+                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                    String ? email = prefs.getString('userEmail'); // ambil email dari session
+
+                    if (email != null) {
+                      Navigator.pushNamed(context, '/profile', arguments: email);
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Email tidak ditemukan!")),
+                      );
+                    }
                   },
                 ),
                 ListTile(

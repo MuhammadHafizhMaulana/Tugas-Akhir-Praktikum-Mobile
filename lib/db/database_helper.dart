@@ -64,4 +64,27 @@ class DBHelper {
       return null;
     }
   }
+
+  // Ambil user berdasarkan email (tanpa password)
+Future<Map<String, dynamic>?> getUserByEmail(String email) async {
+  final db = await database;
+  final result = await db.query(
+    'users',
+    where: 'email = ?',
+    whereArgs: [email],
+  );
+  return result.isNotEmpty ? result.first : null;
+}
+
+// Update nama berdasarkan email
+Future<int> updateUserName(String email, String newName) async {
+  final db = await database;
+  return await db.update(
+    'users',
+    {'name': newName},
+    where: 'email = ?',
+    whereArgs: [email],
+  );
+}
+
 }
