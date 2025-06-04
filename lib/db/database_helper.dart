@@ -21,7 +21,7 @@ class DBHelper {
     final path = join(await getDatabasesPath(), 'users.db');
     return openDatabase(
       path,
-      version: 3,
+      version: 2,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -49,11 +49,10 @@ class DBHelper {
     ''');
   }
 
-  // Upgrade skema database (tidak ada perubahan pada versi 3, hanya untuk contoh)
+
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion < 2) {
-      // Versi 2: menambah tabel favorites
-      await db.execute('''CREATE TABLE favorites (
+      await db.execute('''CREATE TABLE history (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         product_id INTEGER NOT NULL,
@@ -62,6 +61,7 @@ class DBHelper {
       )''');
     }
   }
+  
 
   // CRUD untuk tabel users
 
@@ -153,6 +153,17 @@ class DBHelper {
     final db = await database;
     final res = await db.query(
       'favorites',
+      columns: ['product_id'],
+      where: 'user_id = ?',
+      whereArgs: [userId],
+    );
+    return res.map<int>((row) => row['product_id'] as int).toList();
+  }
+
+    Future<List<int>> getPaymentHistory(int userId) async {
+    final db = await database;
+    final res = await db.query(
+      'history',
       columns: ['product_id'],
       where: 'user_id = ?',
       whereArgs: [userId],

@@ -68,12 +68,12 @@ class SidebarMenu extends StatelessWidget {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.favorite),
-                  title: Text('Favorite'),
+                  leading: Icon(Icons.receipt),
+                  title: Text('Riwayat Belanja'),
                   onTap: () {
                     Navigator.pop(context);
-                    if (onMenuTap != null) onMenuTap!("favorite");
-                    Navigator.pushNamed(context, '/favorite');
+                    if (onMenuTap != null) onMenuTap!("riwayat_belanja");
+                    Navigator.pushNamed(context, '/riwayat_belanja');
                   },
                 ),
                 ListTile(

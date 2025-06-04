@@ -174,7 +174,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           onPressed: _toggleFavorite,
                         ),
                         Text(
-                          _isFavorited ? 'Favorited' : 'Add to Favorite',
+                          _isFavorited ? 'Favorited' : 'Add to Chart',
                           style: TextStyle(color: Colors.white70),
                         ),
                       ],
