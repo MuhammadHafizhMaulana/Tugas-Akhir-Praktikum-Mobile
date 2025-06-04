@@ -67,7 +67,9 @@ class _HomePageState extends State<HomePage> implements ProductView {
           ),
           IconButton(
             icon: Icon(Icons.shopping_cart, color: Colors.white),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.pushNamed(context, '/cart');
+            },
           ),
         ],
       ),

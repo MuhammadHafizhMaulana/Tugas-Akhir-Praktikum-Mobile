@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:royal_clothes/db/database_helper.dart';
+import 'package:royal_clothes/encryption/enkripsiAES';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
@@ -11,17 +12,17 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  bool _isLoading = false; // Untuk menampilkan loading saat login
 
   void saveLoginData(Map<String, dynamic> userData) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('isLoggedIn', true);
-    await prefs.setInt('userId', userData['id']);
     await prefs.setString('userEmail', userData['email']);
   }
 
   Future<void> login() async {
     String email = emailController.text.trim();
-    String password = passwordController.text;
+    String password = EncryptionHelper.encryptData(passwordController.text);
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -30,19 +31,22 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
+    setState(() {
+      _isLoading = true; // Set loading menjadi true saat memulai login
+    });
+
     final db = DBHelper();
-    final user = await db.getUser(
-      email,
-      password,
-    ); // Ganti 'null' dengan argumen yang sesuai jika diperlukan
+    final user = await db.getUser(email, password);
+
+    setState(() {
+      _isLoading = false; // Set loading menjadi false setelah proses selesai
+    });
 
     if (user != null) {
       saveLoginData(user);
       Navigator.pushReplacementNamed(context, '/home');
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text("Email atau password salah")));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Email atau password salah")));
     }
   }
 
@@ -50,7 +54,6 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    // Jangan lupa dispose controller saat widget dihancurkan
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
@@ -60,7 +63,6 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      // Background gradient hitam ke emas
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: double.infinity,
@@ -152,20 +154,24 @@ class _LoginPageState extends State<LoginPage> {
                             minWidth: double.infinity,
                             height: 60,
                             onPressed: login,
-                            color: Color(0xFFFFD700), // tombol emas
+                            color: Color(0xFFFFD700),
                             elevation: 0,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(50),
                             ),
-                            child: Text(
-                              "Login",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                fontSize: 18,
-                                color: Colors.black87,
-                                fontFamily: 'Garamond',
-                              ),
-                            ),
+                            child: _isLoading
+                                ? CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.black87),
+                                  )
+                                : Text(
+                                    "Login",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 18,
+                                      color: Colors.black87,
+                                      fontFamily: 'Garamond',
+                                    ),
+                                  ),
                           ),
                         ),
                       ),
@@ -184,8 +190,6 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                           GestureDetector(
                             onTap: () {
-                              Color.fromARGB(255, 0, 0, 0);
-
                               Navigator.pushNamed(context, '/signup');
                             },
                             child: Text(

@@ -2,6 +2,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:royal_clothes/db/database_helper.dart';
 import 'package:royal_clothes/views/login_page.dart';
+import 'package:royal_clothes/encryption/enkripsiAES'; // Import enkripsiAES
 
 class SignupPage extends StatefulWidget {
   @override
@@ -23,7 +24,9 @@ class _SignupPageState extends State<SignupPage> {
     setState(() => isLoading = true);
     final name = nameController.text.trim();
     final email = emailController.text.trim();
-    final password = passwordController.text;
+    final password = EncryptionHelper.encryptData(passwordController.text);
+
+    
 
     final db = DBHelper();
     final exists = await db.userExists(email);
@@ -45,6 +48,8 @@ class _SignupPageState extends State<SignupPage> {
 
     setState(() => isLoading = false);
   }
+
+  
 
   Widget makeInput({
     required String label,

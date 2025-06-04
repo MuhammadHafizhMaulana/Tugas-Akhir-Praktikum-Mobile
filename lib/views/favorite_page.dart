@@ -70,9 +70,7 @@ class _FavoritePageState extends State<FavoritePage> {
 
       for (var productId in favoriteProductIds) {
         final productJson = await BaseNetwork.getDetalDataProduct(widget.endpoint, productId);
-        if (productJson != null) {
-          products.add(Product.fromJson(productJson));
-        }
+        products.add(Product.fromJson(productJson));
       }
 
       setState(() {
@@ -80,10 +78,13 @@ class _FavoritePageState extends State<FavoritePage> {
         isLoading = false;
       });
     } catch (e) {
-      setState(() {
-        errorMessage = e.toString();
-        isLoading = false;
-      });
+       if (mounted) {
+    setState(() {
+       isLoading = true;
+      errorMessage = null;
+      favoriteProductList = [];
+    });
+  }
     }
   }
 
