@@ -1,100 +1,134 @@
 import 'package:flutter/material.dart';
-import 'package:royal_clothes/models/product_model.dart';
-import 'package:royal_clothes/network/base_network.dart';
-import 'package:royal_clothes/views/appBar_page.dart';
-import 'package:royal_clothes/views/sidebar_menu_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:royal_clothes/network/Base_network.dart';
 import 'package:royal_clothes/db/database_helper.dart';
+import 'package:royal_clothes/views/appBar_page.dart';
+import 'package:royal_clothes/network/convert_network.dart';
+import 'package:royal_clothes/views/sidebar_menu_page.dart';
 
-class DetailScreen extends StatefulWidget {
-  final int id;
+class PaymentPage extends StatefulWidget {
+  final int userId;
+  final int productId;
   final String endpoint;
 
-  const DetailScreen({super.key, required this.id, required this.endpoint});
+  const PaymentPage({
+    super.key,
+    required this.userId,
+    required this.productId,
+    required this.endpoint,
+  });
 
   @override
-  State<DetailScreen> createState() => _DetailScreenState();
+  State<PaymentPage> createState() => _PaymentPageState();
 }
 
-class _DetailScreenState extends State<DetailScreen> {
+class _PaymentPageState extends State<PaymentPage> {
   bool _isLoading = true;
   Map<String, dynamic>? _detailData;
   String? errorMessage;
-  bool _isFavorited = false;
-  int? userId;
+  int quantity = 1; // Inisialisasi jumlah item dengan nilai default 1
+  double? totalPrice;
+  Map<String, double>? currencyRates;
   final DBHelper _dbHelper = DBHelper();
 
   @override
-  void initState() {
-    super.initState();
-    _loadUserEmailAndFavorites();
-    _fetchDetailData();
-    _loadFavoriteStatus();
-  }
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-  Future<void> _loadUserEmailAndFavorites() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? email = prefs.getString('userEmail');
+    // Menggunakan data langsung dari widget
+    int? productId = widget.productId;
+    String? endpoint = widget.endpoint;
 
-    if (email == null) {
+    if (productId == null || endpoint == null) {
       setState(() {
-        errorMessage = "User belum login.";
+        errorMessage = 'Missing required data.';
+        _isLoading = false;
       });
-      return;
+    } else {
+      // Ambil data produk dari API dengan productId dan endpoint
+      _fetchProductData(productId, endpoint);
     }
 
-    // Dapatkan userId berdasarkan email dari SQLite
-    final userData = await _dbHelper.getUserByEmail(email);
-    if (userData == null) {
-      setState(() {
-        errorMessage = "User tidak ditemukan di database lokal.";
-      });
-      return;
-    }
-
-    int userId = userData['id'] as int;
-    setState(() {
-      this.userId = userId;
-    });
-
-    await _loadFavoriteStatus();
+    // Mengambil data konversi mata uang
+    _fetchCurrencyRates();
   }
 
-  Future<void> _fetchDetailData() async {
+  // Mendapatkan data produk dari API
+  Future<void> _fetchProductData(int productId, String endpoint) async {
     try {
-      final data = await BaseNetwork.getDetalDataProduct(
-        widget.endpoint,
-        widget.id,
-      );
+      final data = await BaseNetwork.getDetalDataProduct(endpoint, productId);
       setState(() {
         _detailData = data;
+        totalPrice = _detailData!['price'] * quantity; // Menghitung total harga
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
-        errorMessage = e.toString();
+        errorMessage = "Error fetching product data: $e";
         _isLoading = false;
       });
     }
   }
 
-  Future<void> _loadFavoriteStatus() async {
-    if (userId == null) return;
-    bool status = await _dbHelper.isFavorited(userId!, widget.id);
+  // Mendapatkan data konversi mata uang
+  Future<void> _fetchCurrencyRates() async {
+    try {
+      // Mendapatkan data konversi mata uang melalui API
+      final convertModel = await ConvertNetwork.getConvertData();
+
+      setState(() {
+        currencyRates =
+            convertModel
+                .idrToCurrencies; // Menggunakan data langsung tanpa konversi tambahan
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Error fetching currency rates: $e";
+        _isLoading = false;
+      });
+    }
+  }
+
+  // Fungsi untuk menambah produk ke history pembayaran
+  Future<void> _addToPaymentHistory() async {
+    if (widget.userId == null || widget.productId == null) {
+      setState(() {
+        errorMessage = "User ID or Product ID is missing.";
+      });
+      return;
+    }
+
+    try {
+      await _dbHelper.addPaymentHistory(
+        widget.userId,
+        widget.productId,
+        quantity, // assuming this parameter expects int
+        (totalPrice ?? 0.0).toDouble(), // assuming this parameter expects double
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Product added to payment history')),
+      );
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to add product to payment history: $e";
+      });
+    }
+  }
+
+  // Fungsi untuk menambah jumlah item
+  void _increaseQuantity() {
     setState(() {
-      _isFavorited = status;
+      quantity++;
+      totalPrice = (_detailData!['price'] as double) * quantity;
     });
   }
 
-  Future<void> _toggleFavorite() async {
-    if (_isFavorited) {
-      await _dbHelper.removeFavorite(userId!, widget.id);
-    } else {
-      await _dbHelper.addFavorite(userId!, widget.id);
-    }
-    bool status = await _dbHelper.isFavorited(userId!, widget.id);
+  // Fungsi untuk mengurangi jumlah item
+  void _decreaseQuantity() {
     setState(() {
-      _isFavorited = status;
+      if (quantity > 1) {
+        quantity--;
+        totalPrice = (_detailData!['price'] as double) * quantity;
+      }
     });
   }
 
@@ -102,7 +136,7 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF121212),
-      appBar: AppbarPage(title: 'Detail Product', actions: []),
+      appBar: AppbarPage(title: 'Payment'),
       drawer: SidebarMenu(),
       body:
           _isLoading
@@ -162,60 +196,57 @@ class _DetailScreenState extends State<DetailScreen> {
                         fontFamily: 'Garamond',
                       ),
                     ),
+                    SizedBox(height: 20),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         IconButton(
-                          icon: Icon(
-                            _isFavorited
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: _isFavorited ? Colors.red : Colors.white70,
-                          ),
-                          onPressed: _toggleFavorite,
+                          icon: Icon(Icons.remove),
+                          onPressed: _decreaseQuantity,
                         ),
                         Text(
-                          _isFavorited ? 'Favorited' : 'Add to Chart',
-                          style: TextStyle(color: Colors.white70),
+                          '$quantity',
+                          style: TextStyle(color: Colors.white70, fontSize: 20),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.add),
+                          onPressed: _increaseQuantity,
                         ),
                       ],
                     ),
                     SizedBox(height: 20),
                     Text(
-                      _detailData!['description'] ??
-                          'No description available.',
+                      'Total Harga: \$ ${totalPrice?.toStringAsFixed(0)}',
                       style: TextStyle(
                         color: Colors.white70,
-                        fontSize: 16,
+                        fontSize: 18,
                         fontFamily: 'Garamond',
                       ),
                     ),
+                    SizedBox(height: 20),
+                    // Menampilkan total harga dalam mata uang lain
+                    if (currencyRates != null)
+                      ...currencyRates!.keys.map((currency) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Text(
+                            '$currency: ${(currencyRates![currency] ?? 0) * totalPrice!}',
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     SizedBox(height: 40),
                     Align(
                       alignment: Alignment.bottomCenter,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: ElevatedButton(
-                          onPressed: () {
-                            if (userId == null) {
-                              setState(() {
-                                errorMessage = "User ID tidak ditemukan.";
-                              });
-                              return;
-                            }
-
-                            // Mengarahkan ke halaman /payment dengan membawa data
-                            Navigator.pushNamed(
-                              context,
-                              '/payment',
-                              arguments: {
-                                'userId': userId,
-                                'productId': widget.id,
-                                'endpoint': widget.endpoint,
-                              },
-                            ).then((result) {
-                              // Jika ada pengembalian data, bisa ditangani disini
-                              print('Returned: $result');
-                            });
+                          onPressed: () async {
+                            await _addToPaymentHistory();
+                            Navigator.pushNamed(context, '/payment');
                           },
                           child: Text("BUY THIS PRODUCT"),
                           style: ElevatedButton.styleFrom(

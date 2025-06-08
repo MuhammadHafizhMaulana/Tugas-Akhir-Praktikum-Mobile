@@ -4,7 +4,6 @@ import 'package:royal_clothes/models/product_model.dart';
 import 'package:royal_clothes/network/base_network.dart';
 import 'package:royal_clothes/views/sidebar_menu_page.dart';
 import 'package:royal_clothes/views/appBar_page.dart';
-import 'package:royal_clothes/views/detail_product_page.dart';
 import 'package:royal_clothes/db/database_helper.dart';
 
 class PaymentHistoryPage extends StatefulWidget {
@@ -18,7 +17,7 @@ class PaymentHistoryPage extends StatefulWidget {
 
 class _PaymentHistoryPage extends State<PaymentHistoryPage> {
   final DBHelper _dbHelper = DBHelper();
-  List<Product> favoriteProductList = [];
+  List<Product> paymentHistoryList = [];
   bool isLoading = false;
   String? errorMessage;
   int? userId;
@@ -40,7 +39,6 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
       return;
     }
 
-    // Dapatkan userId berdasarkan email dari SQLite
     final userData = await _dbHelper.getUserByEmail(email);
     if (userData == null) {
       setState(() {
@@ -61,96 +59,79 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
     setState(() {
       isLoading = true;
       errorMessage = null;
-      favoriteProductList = [];
+      paymentHistoryList = [];
     });
 
     try {
       final Ids = await _dbHelper.getPaymentHistory(userId);
       List<Product> products = [];
 
-      for (var productId in Ids) {
+      for (var productMap in Ids) {
+        final int productId = productMap['product_id'] as int;
         final productJson = await BaseNetwork.getDetalDataProduct(widget.endpoint, productId);
         products.add(Product.fromJson(productJson));
       }
 
       setState(() {
-        favoriteProductList = products;
+        paymentHistoryList = products;
         isLoading = false;
       });
     } catch (e) {
-       if (mounted) {
-    setState(() {
-       isLoading = true;
-      errorMessage = null;
-      favoriteProductList = [];
-    });
-  }
+      setState(() {
+        isLoading = false;
+        errorMessage = "Terjadi kesalahan saat memuat riwayat pembayaran.";
+      });
     }
   }
 
   Widget productCard(Product product) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailScreen(
-              id: product.id,
-              endpoint: widget.endpoint,
+    return Container(
+      decoration: BoxDecoration(
+        color: Color(0xFF2C2C2C),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              child: Image.network(
+                product.imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (context, error, stackTrace) =>
+                    Icon(Icons.broken_image, size: 50, color: Colors.grey),
+              ),
             ),
           ),
-        ).then((_) {
-          _loadUserEmail(); // refresh setelah kembali dari detail
-        });
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: Color(0xFF2C2C2C),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-                child: Image.network(
-                  product.imageUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  errorBuilder: (context, error, stackTrace) =>
-                      Icon(Icons.broken_image, size: 50, color: Colors.grey),
-                ),
+          Padding(
+            padding: EdgeInsets.all(8),
+            child: Text(
+              product.title,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Garamond',
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              'Rp ${product.price.toStringAsFixed(0)}.000',
+              style: TextStyle(
+                color: Color(0xFFFFD700),
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Garamond',
+                fontSize: 16,
               ),
             ),
-            Padding(
-              padding: EdgeInsets.all(8),
-              child: Text(
-                product.title,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: 'Garamond',
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                'Rp ${product.price.toStringAsFixed(0)}.000',
-                style: TextStyle(
-                  color: Color(0xFFFFD700),
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Garamond',
-                  fontSize: 16,
-                ),
-              ),
-            ),
-            SizedBox(height: 8),
-          ],
-        ),
+          ),
+          SizedBox(height: 8),
+        ],
       ),
     );
   }
@@ -173,7 +154,7 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
                     style: TextStyle(color: Colors.redAccent, fontSize: 16),
                   ),
                 )
-              : favoriteProductList.isEmpty
+              : paymentHistoryList.isEmpty
                   ? Center(
                       child: Text(
                         "No Payment History Products Found",
@@ -183,7 +164,7 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
                   : Padding(
                       padding: EdgeInsets.all(16),
                       child: GridView.builder(
-                        itemCount: favoriteProductList.length,
+                        itemCount: paymentHistoryList.length,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           mainAxisSpacing: 15,
@@ -191,7 +172,7 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
                           childAspectRatio: 0.65,
                         ),
                         itemBuilder: (context, index) {
-                          final product = favoriteProductList[index];
+                          final product = paymentHistoryList[index];
                           return productCard(product);
                         },
                       ),

@@ -1,7 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:royal_clothes/db/database_helper.dart';
-import 'package:royal_clothes/encryption/enkripsiAES';
+import 'package:royal_clothes/encryption/enkripsiAES.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {

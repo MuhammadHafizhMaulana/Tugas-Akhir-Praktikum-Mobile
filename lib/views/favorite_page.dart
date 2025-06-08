@@ -160,7 +160,7 @@ class _FavoritePageState extends State<FavoritePage> {
     return Scaffold(
       backgroundColor: Color(0xFF121212),
       appBar: AppbarPage(
-        title: 'Favorite Products',
+        title: 'Chart',
         actions: [],
       ),
       drawer: SidebarMenu(),

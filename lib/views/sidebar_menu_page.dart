@@ -72,8 +72,8 @@ class SidebarMenu extends StatelessWidget {
                   title: Text('Riwayat Belanja'),
                   onTap: () {
                     Navigator.pop(context);
-                    if (onMenuTap != null) onMenuTap!("riwayat_belanja");
-                    Navigator.pushNamed(context, '/riwayat_belanja');
+                    if (onMenuTap != null) onMenuTap!("paymenthistory");
+                    Navigator.pushNamed(context, '/paymenthistory');
                   },
                 ),
                 ListTile(
