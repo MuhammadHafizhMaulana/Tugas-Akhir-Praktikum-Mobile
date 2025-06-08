@@ -10,6 +10,7 @@ import 'package:royal_clothes/views/favorite_page.dart';
 import 'package:royal_clothes/views/kesan_saran_page.dart';
 import 'package:royal_clothes/views/payment_page.dart';
 import 'package:royal_clothes/views/payment_history_page.dart';
+import 'package:royal_clothes/db/database_helper.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // WAJIB sebelum SharedPreferences

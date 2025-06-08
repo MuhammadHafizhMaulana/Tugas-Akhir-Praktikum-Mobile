@@ -69,7 +69,19 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
       for (var productMap in Ids) {
         final int productId = productMap['product_id'] as int;
         final productJson = await BaseNetwork.getDetalDataProduct(widget.endpoint, productId);
-        products.add(Product.fromJson(productJson));
+
+        // Ambil informasi tambahan dari database
+        final quantity = productMap['quantity'];
+        final createdAt = productMap['created_at'];
+        final totalPrice = productMap['total_price'];
+
+        // Membuat objek Product dengan informasi yang diambil dari API dan database
+        final product = Product.fromJson(productJson);
+        product.quantity = quantity;
+        product.createdAt = createdAt;
+        product.totalPrice = totalPrice;
+
+        products.add(product);
       }
 
       setState(() {
@@ -131,6 +143,34 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
             ),
           ),
           SizedBox(height: 8),
+          
+          // Menampilkan quantity, tanggal pembelian dan total harga
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              'Quantity: ${product.quantity}',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              'Tanggal Pembelian: ${product.createdAt}',
+              style: TextStyle(color: Colors.white70, fontSize: 14),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              'Total Harga: Rp ${product.totalPrice.toStringAsFixed(0)}.000',
+              style: TextStyle(
+                color: Color(0xFFFFD700),
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Garamond',
+                fontSize: 16,
+              ),
+            ),
+          ),
         ],
       ),
     );

@@ -5,6 +5,7 @@ class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
   factory DBHelper() => _instance;
   DBHelper._internal();
+  
 
   Database? _database;
 
@@ -20,9 +21,9 @@ class DBHelper {
     final path = join(await getDatabasesPath(), 'users.db');
     return openDatabase(
       path,
-      version: 2, // Perbarui versi database
+      version: 1, // Perbarui versi database
       onCreate: _onCreate,
-      onUpgrade: _onUpgrade, // Menambahkan fungsi onUpgrade
+     // onUpgrade: _onUpgrade, // Menambahkan fungsi onUpgrade
     );
   }
 
@@ -52,27 +53,16 @@ class DBHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         user_id INTEGER NOT NULL,
         product_id INTEGER NOT NULL,
-        quantity INTEGER NOT NULL DEFAULT 1,  -- Menambahkan kolom quantity
-        total_price REAL NOT NULL,           -- Menambahkan kolom total_price
+        quantity INTEGER NOT NULL DEFAULT 1, 
+        total_price REAL NOT NULL,          
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, 
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
       )
     ''');
   }
+  
 
-  // Fungsi untuk menangani pembaruan database (update schema)
-  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
-    if (oldVersion < 2) {
-      // Menambahkan kolom quantity dan total_price jika belum ada
-      await db.execute(''' 
-        ALTER TABLE history ADD COLUMN quantity INTEGER NOT NULL DEFAULT 1
-      ''');
-      await db.execute(''' 
-        ALTER TABLE history ADD COLUMN total_price REAL NOT NULL
-      ''');
-    }
-  }
 
   // Insert user
   Future<int> insertUser(String name, String email, String password) async {
