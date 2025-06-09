@@ -7,8 +7,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:royal_clothes/main.dart';
 import 'package:royal_clothes/views/landing_page.dart';
 
 void main() {

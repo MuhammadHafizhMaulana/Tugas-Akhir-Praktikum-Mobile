@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:royal_clothes/models/product_model.dart';
 import 'package:royal_clothes/network/base_network.dart';
 import 'package:royal_clothes/views/appBar_page.dart';
 import 'package:royal_clothes/views/sidebar_menu_page.dart';

@@ -5,8 +5,6 @@ class DBHelper {
   static final DBHelper _instance = DBHelper._internal();
   factory DBHelper() => _instance;
   DBHelper._internal();
-  
-
   Database? _database;
 
   // Mengakses database

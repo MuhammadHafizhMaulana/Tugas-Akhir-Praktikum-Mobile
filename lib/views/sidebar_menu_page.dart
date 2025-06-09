@@ -77,6 +77,15 @@ class SidebarMenu extends StatelessWidget {
                   },
                 ),
                 ListTile(
+                  leading: Icon(Icons.map),
+                  title: Text('Location'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    if (onMenuTap != null) onMenuTap!("location");
+                    Navigator.pushNamed(context, '/location');
+                  },
+                ),
+                ListTile(
                   leading: Icon(Icons.feedback),
                   title: Text('Kesan & Saran'),
                   onTap: () {
