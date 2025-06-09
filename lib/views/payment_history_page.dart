@@ -5,6 +5,7 @@ import 'package:royal_clothes/network/base_network.dart';
 import 'package:royal_clothes/views/sidebar_menu_page.dart';
 import 'package:royal_clothes/views/appBar_page.dart';
 import 'package:royal_clothes/db/database_helper.dart';
+import 'package:intl/intl.dart'; // Pastikan intl diimport
 
 class PaymentHistoryPage extends StatefulWidget {
   final String endpoint;
@@ -12,23 +13,26 @@ class PaymentHistoryPage extends StatefulWidget {
   const PaymentHistoryPage({super.key, required this.endpoint});
 
   @override
-  _PaymentHistoryPage createState() => _PaymentHistoryPage();
+  _PaymentHistoryPageState createState() => _PaymentHistoryPageState();
 }
 
-class _PaymentHistoryPage extends State<PaymentHistoryPage> {
+class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
   final DBHelper _dbHelper = DBHelper();
-  List<Product> paymentHistoryList = [];
+  List<Map<String, dynamic>> paymentHistoryList = [];
   bool isLoading = false;
   String? errorMessage;
   int? userId;
+  
+  // Menyimpan zona waktu yang dipilih oleh pengguna
+  String selectedTimezone = "WIB"; // Default adalah WIB
 
   @override
   void initState() {
     super.initState();
-    _loadUserEmail();
+    _loadUserEmailAndHistory();
   }
 
-  Future<void> _loadUserEmail() async {
+  Future<void> _loadUserEmailAndHistory() async {
     final prefs = await SharedPreferences.getInstance();
     final String? email = prefs.getString('userEmail');
 
@@ -39,6 +43,7 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
       return;
     }
 
+    // Dapatkan userId berdasarkan email dari SQLite
     final userData = await _dbHelper.getUserByEmail(email);
     if (userData == null) {
       setState(() {
@@ -63,29 +68,38 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
     });
 
     try {
-      final Ids = await _dbHelper.getPaymentHistory(userId);
-      List<Product> products = [];
+      final history = await _dbHelper.getPaymentHistory(userId);
 
-      for (var productMap in Ids) {
-        final int productId = productMap['product_id'] as int;
+      if (history.isEmpty) {
+        setState(() {
+          errorMessage = "Tidak ada riwayat pembayaran ditemukan.";
+          isLoading = false;
+        });
+        return;
+      }
+
+      List<Map<String, dynamic>> productsData = [];
+
+      // Memetakan data berdasarkan product_id untuk mendapatkan data produk dari API
+      for (var productMap in history) {
+        final int productId = productMap['product_id'];
+
+        // Ambil data produk berdasarkan product_id
         final productJson = await BaseNetwork.getDetalDataProduct(widget.endpoint, productId);
 
-        // Ambil informasi tambahan dari database
-        final quantity = productMap['quantity'];
-        final createdAt = productMap['created_at'];
-        final totalPrice = productMap['total_price'];
+        // Menyusun data produk dengan data riwayat pembelian
+        Map<String, dynamic> productData = {
+          'product': Product.fromJson(productJson),  // Data produk dari API
+          'quantity': productMap['quantity'],      // Quantity dari riwayat pembelian
+          'createdAt': productMap['created_at'],   // Created_at dari riwayat pembelian
+          'totalPrice': productMap['total_price'], // Total_price dari riwayat pembelian
+        };
 
-        // Membuat objek Product dengan informasi yang diambil dari API dan database
-        final product = Product.fromJson(productJson);
-        product.quantity = quantity;
-        product.createdAt = createdAt;
-        product.totalPrice = totalPrice;
-
-        products.add(product);
+        productsData.add(productData); // Menambahkan data produk beserta riwayat pembelian
       }
 
       setState(() {
-        paymentHistoryList = products;
+        paymentHistoryList = productsData;  // Menyimpan data produk beserta riwayat pembelian
         isLoading = false;
       });
     } catch (e) {
@@ -96,7 +110,34 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
     }
   }
 
-  Widget productCard(Product product) {
+  // Fungsi untuk mengonversi dan menampilkan waktu sesuai zona waktu
+  String _convertTimeBasedOnLocation(String createdAt, String location) {
+    DateTime utcDate = DateTime.parse(createdAt);  // Mengonversi string ke DateTime (UTC)
+    DateTime localDate = utcDate.toLocal(); // Mengonversi UTC ke waktu lokal
+
+    // Format tanggal dengan menggunakan intl
+    var format = DateFormat.yMMMd('id_ID').add_jm();  // Format waktu dengan DateFormat
+
+    // Menyesuaikan zona waktu yang diinginkan
+    if (location == 'London') {
+      localDate = localDate.toUtc();  // Mengonversi ke waktu UTC (London waktu)
+    } else if (location == 'WIB') {
+      localDate = localDate.add(Duration(hours: 7)); // Waktu Indonesia Barat (GMT+7)
+    } else if (location == 'WITA') {
+      localDate = localDate.add(Duration(hours: 8)); // Waktu Indonesia Tengah (GMT+8)
+    } else if (location == 'WIT') {
+      localDate = localDate.add(Duration(hours: 9)); // Waktu Indonesia Timur (GMT+9)
+    }
+
+    return format.format(localDate);  // Mengembalikan waktu yang sudah diformat
+  }
+
+  Widget productCard(Map<String, dynamic> productData) {
+    final Product product = productData['product'];
+    final quantity = productData['quantity'];
+    final createdAt = productData['createdAt'];
+    final totalPrice = productData['totalPrice'];
+
     return Container(
       decoration: BoxDecoration(
         color: Color(0xFF2C2C2C),
@@ -133,7 +174,7 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: Text(
-              'Rp ${product.price.toStringAsFixed(0)}.000',
+              '\$ ${product.price.toStringAsFixed(0)}',
               style: TextStyle(
                 color: Color(0xFFFFD700),
                 fontWeight: FontWeight.bold,
@@ -148,21 +189,48 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: Text(
-              'Quantity: ${product.quantity}',
+              'Quantity: $quantity',
               style: TextStyle(color: Colors.white70, fontSize: 14),
             ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Text(
-              'Tanggal Pembelian: ${product.createdAt}',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Menampilkan dropdown untuk memilih zona waktu
+                DropdownButton<String>(
+                  value: selectedTimezone,
+                  icon: Icon(Icons.arrow_downward),
+                  iconSize: 24,
+                  elevation: 16,
+                  style: TextStyle(color: Colors.white),
+                  dropdownColor: Color(0xFF2C2C2C),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      selectedTimezone = newValue!;
+                    });
+                  },
+                  items: <String>['WIB', 'WITA', 'WIT', 'London']
+                      .map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+                // Menampilkan tanggal pembelian berdasarkan zona waktu yang dipilih
+                Text(
+                  'Tanggal Pembelian ($selectedTimezone): ${_convertTimeBasedOnLocation(createdAt, selectedTimezone)}',
+                  style: TextStyle(color: Colors.white70, fontSize: 14),
+                ),
+              ],
             ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8),
             child: Text(
-              'Total Harga: Rp ${product.totalPrice.toStringAsFixed(0)}.000',
+              'Total Harga: \$ ${totalPrice.toStringAsFixed(0)}',
               style: TextStyle(
                 color: Color(0xFFFFD700),
                 fontWeight: FontWeight.bold,
@@ -182,7 +250,6 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
       backgroundColor: Color(0xFF121212),
       appBar: AppbarPage(
         title: 'Payment History',
-        actions: [],
       ),
       drawer: SidebarMenu(),
       body: isLoading
@@ -212,8 +279,8 @@ class _PaymentHistoryPage extends State<PaymentHistoryPage> {
                           childAspectRatio: 0.65,
                         ),
                         itemBuilder: (context, index) {
-                          final product = paymentHistoryList[index];
-                          return productCard(product);
+                          final productData = paymentHistoryList[index];
+                          return productCard(productData);  // Menampilkan produk
                         },
                       ),
                     ),

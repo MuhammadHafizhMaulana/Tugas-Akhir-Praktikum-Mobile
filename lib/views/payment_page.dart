@@ -246,7 +246,7 @@ class _PaymentPageState extends State<PaymentPage> {
                         child: ElevatedButton(
                           onPressed: () async {
                             await _addToPaymentHistory();
-                            Navigator.pushNamed(context, '/payment');
+                            Navigator.pushNamed(context, '/paymenthistory');
                           },
                           child: Text("BUY THIS PRODUCT"),
                           style: ElevatedButton.styleFrom(

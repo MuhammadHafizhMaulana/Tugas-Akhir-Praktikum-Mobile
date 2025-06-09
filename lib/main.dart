@@ -10,13 +10,14 @@ import 'package:royal_clothes/views/favorite_page.dart';
 import 'package:royal_clothes/views/kesan_saran_page.dart';
 import 'package:royal_clothes/views/payment_page.dart';
 import 'package:royal_clothes/views/payment_history_page.dart';
-import 'package:royal_clothes/db/database_helper.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); // WAJIB sebelum SharedPreferences
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
-
+   await initializeDateFormatting('id_ID', null); 
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
