@@ -21,11 +21,10 @@ class DBHelper {
       path,
       version: 1, // Perbarui versi database
       onCreate: _onCreate,
-     // onUpgrade: _onUpgrade, // Menambahkan fungsi onUpgrade
     );
   }
 
-  // Membuat tabel users, favorites, dan history
+  // Membuat tabel users, favorites, history, dan markers
   Future _onCreate(Database db, int version) async {
     await db.execute(''' 
       CREATE TABLE users (
@@ -58,9 +57,17 @@ class DBHelper {
         FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
       )
     ''');
-  }
-  
 
+    // Menambahkan tabel markers untuk menyimpan nama dan lokasi marker
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS markers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        latitude REAL NOT NULL,
+        longitude REAL NOT NULL
+      )
+    ''');
+  }
 
   // Insert user
   Future<int> insertUser(String name, String email, String password) async {
@@ -134,6 +141,7 @@ class DBHelper {
     );
     return res;
   }
+
   // Menambah favorit (user_id dan product_id)
   Future<int> addFavorite(int userId, int productId) async {
     final db = await database;
@@ -177,8 +185,35 @@ class DBHelper {
     return res.map<int>((row) => row['product_id'] as int).toList();
   }
 
+  // Fungsi untuk menyimpan marker ke database
+  Future<void> saveMarker(String name, double latitude, double longitude) async {
+    final db = await database;
+    await db.insert(
+      'markers',
+      {'name': name, 'latitude': latitude, 'longitude': longitude},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // Fungsi untuk mengambil semua marker dari database
+  Future<List<Map<String, dynamic>>> getMarkers() async {
+    final db = await database;
+    return await db.query('markers');
+  }
+
+  // Menghapus marker dari database berdasarkan ID
+  Future<int> deleteMarker(int id) async {
+    final db = await database;
+    return await db.delete(
+      'markers',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
   Future<void> deleteDatabaseIfExists() async {
     final path = join(await getDatabasesPath(), 'users.db');
     await deleteDatabase(path); // Menghapus database lama jika ada
   }
+
 }

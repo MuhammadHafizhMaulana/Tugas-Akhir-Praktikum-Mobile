@@ -19,7 +19,7 @@ Future<void> main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false;
   await initializeDateFormatting('id_ID', null);
-  //await DBHelper().deleteDatabaseIfExists();
+  await DBHelper().deleteDatabaseIfExists();
   runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
